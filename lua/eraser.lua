@@ -35,7 +35,7 @@ local function get_commit(range_table)
 	local query = [[
   (comment) @comment
 ]]
-	local captures = vim.treesitter.query.parse("lua", query)
+	local captures = vim.treesitter.query.parse(vim.bo.filetype, query)
 	local tree = vim.treesitter.get_parser():parse()[1]
 	for _, node, _ in captures:iter_captures(tree:root(), 0, range_table.lstart - 1, range_table.lend) do
 		local start_row, start_col, _, end_col = node:range()
