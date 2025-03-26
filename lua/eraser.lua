@@ -34,7 +34,7 @@ local function erase_plus(range_table)
 	for i = range_table.lstart, range_table.lend do
 		local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1]
 		if line:sub(1, 1) == "+" then
-			local modified_line = " " .. line:sub(2)
+			local modified_line = line:sub(2)
 			vim.api.nvim_buf_set_lines(0, i - 1, i, false, { modified_line })
 		end
 	end
