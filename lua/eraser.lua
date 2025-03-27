@@ -80,6 +80,9 @@ local function erase_in_line(position)
 	end
 	local line = vim.api.nvim_buf_get_lines(0, position.row - 1, position.row, false)[1]
 	local cleaned_line = remove_range(line, position.start_col, position.end_col)
+	if cleaned_line:match("^[\t%s]*$") then
+		cleaned_line = ""
+	end
 	vim.api.nvim_buf_set_lines(0, position.row - 1, position.row, false, { cleaned_line })
 end
 
