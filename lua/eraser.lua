@@ -80,7 +80,11 @@ local function erase_in_line(position)
 	end
 	local line = vim.api.nvim_buf_get_lines(0, position.row - 1, position.row, false)[1]
 	local cleaned_line = remove_range(line, position.start_col, position.end_col)
-	if cleaned_line:match("^[\t%s]*$") then
+	if cleaned_line:match("^[%s\t]*$") then
+		if not eraser.config.retain_blank then
+			vim.api.nvim_buf_set_lines(0, position.row - 1, position.row, false, {})
+			return
+		end
 		cleaned_line = ""
 	end
 	vim.api.nvim_buf_set_lines(0, position.row - 1, position.row, false, { cleaned_line })
@@ -101,7 +105,9 @@ function eraser.init()
 	end, {})
 end
 
-function eraser.setup()
+function eraser.setup(opts)
+	-- print(vim.inspect(opts))
+	eraser.config = opts
 	eraser.init()
 end
 
