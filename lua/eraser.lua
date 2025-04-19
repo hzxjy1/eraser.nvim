@@ -111,7 +111,6 @@ function eraser.init()
 end
 
 function eraser.setup(opts)
-	print("aaa")
 	-- print(vim.inspect(opts))
 	eraser.config = opts
 	eraser.init()
