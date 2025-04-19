@@ -45,7 +45,12 @@ local function get_commit(range_table)
 	local query = [[
   (comment) @comment
 ]]
-	local captures = vim.treesitter.query.parse(vim.bo.filetype, query)
+	local success, captures = pcall(function()
+		return vim.treesitter.query.parse(vim.bo.filetype, query)
+	end)
+	if not success then
+		return {}
+	end
 	local tree = vim.treesitter.get_parser():parse()[1]
 	for _, node, _ in captures:iter_captures(tree:root(), 0, range_table.lstart - 1, range_table.lend) do
 		local start_row, start_col, _, end_col = node:range()
@@ -106,6 +111,7 @@ function eraser.init()
 end
 
 function eraser.setup(opts)
+	print("aaa")
 	-- print(vim.inspect(opts))
 	eraser.config = opts
 	eraser.init()
