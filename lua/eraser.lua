@@ -30,16 +30,6 @@ local function make_range()
 	return o
 end
 
-local function erase_plus(range_table)
-	for i = range_table.lstart, range_table.lend do
-		local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1]
-		if line:sub(1, 1) == "+" then
-			local modified_line = line:sub(2)
-			vim.api.nvim_buf_set_lines(0, i - 1, i, false, { modified_line })
-		end
-	end
-end
-
 local function get_commit(range_table)
 	local positions = {}
 	local query = [[
@@ -79,39 +69,55 @@ local function remove_range(str, start_col, end_col)
 	return before .. after
 end
 
-local function erase_in_line(position)
+local function erase_in_line(position, offset)
 	if position == nil then
-		return
+		return 1
 	end
+	position.row = position.row - offset
+
 	local line = vim.api.nvim_buf_get_lines(0, position.row - 1, position.row, false)[1]
 	local cleaned_line = remove_range(line, position.start_col, position.end_col)
 	if cleaned_line:match("^[%s\t]*$") then
-		if not eraser.config.retain_blank then
+		if not eraser.config.retain_blank then -- Delete the whole line
 			vim.api.nvim_buf_set_lines(0, position.row - 1, position.row, false, {})
-			return
+			return 2
 		end
 		cleaned_line = ""
 	end
 	vim.api.nvim_buf_set_lines(0, position.row - 1, position.row, false, { cleaned_line })
+
+	return 0
+end
+
+local function erase_commit()
+	local range = make_range()
+	local lines = get_commit(range)
+	local offset = 0
+
+	for _, line in pairs(lines) do
+		if erase_in_line(line, offset) == 2 then
+			offset = offset + 1
+		end
+	end
+end
+
+local function erase_plus()
+	local range_table = make_range()
+	for i = range_table.lstart, range_table.lend do
+		local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1]
+		if line:sub(1, 1) == "+" then
+			local modified_line = line:sub(2)
+			vim.api.nvim_buf_set_lines(0, i - 1, i, false, { modified_line })
+		end
+	end
 end
 
 function eraser.init()
-	vim.api.nvim_create_user_command("EraseCommit", function()
-		local range = make_range()
-		local lines = get_commit(range)
-		for _, line in pairs(lines) do
-			erase_in_line(line)
-		end
-	end, {})
-
-	vim.api.nvim_create_user_command("ErasePlus", function()
-		local range = make_range()
-		erase_plus(range)
-	end, {})
+	vim.api.nvim_create_user_command("EraseCommit", erase_commit, {})
+	vim.api.nvim_create_user_command("ErasePlus", erase_plus, {})
 end
 
 function eraser.setup(opts)
-	-- print(vim.inspect(opts))
 	eraser.config = opts
 	eraser.init()
 end
