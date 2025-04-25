@@ -86,14 +86,14 @@ local function erase_plus()
 	end
 end
 
-function eraser.init()
+local function init()
 	vim.api.nvim_create_user_command("EraseCommit", erase_commit, {})
 	vim.api.nvim_create_user_command("ErasePlus", erase_plus, {})
 end
 
 function eraser.setup(opts)
 	eraser.config = opts
-	eraser.init()
+	init()
 end
 
 return eraser
