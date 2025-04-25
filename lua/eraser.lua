@@ -55,6 +55,9 @@ local function erase_in_line(position, offset)
 		end
 		cleaned_line = ""
 	end
+
+	cleaned_line = cleaned_line:match("^(.-)%s*$") -- Strip blanks in end of line
+	-- print(string.format("%q", cleaned_line))
 	vim.api.nvim_buf_set_lines(0, position.row - 1, position.row, false, { cleaned_line })
 
 	return 0
