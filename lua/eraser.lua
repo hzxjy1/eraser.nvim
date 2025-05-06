@@ -6,8 +6,14 @@ local function get_commit(ranges)
 	local query = [[
   (comment) @comment
 ]]
+
+	local filetype = vim.bo.filetype
+	if vim.tbl_contains({ "javascriptreact", "typescriptreact" }, vim.bo.filetype) then
+		filetype = "javascript"
+	end
+
 	local success, captures = pcall(function()
-		return vim.treesitter.query.parse(vim.bo.filetype, query)
+		return vim.treesitter.query.parse(filetype, query)
 	end)
 	if not success then
 		return {}
